@@ -1,0 +1,153 @@
+/* CentroGestion.css */
+
+.centro-gestion-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: radial-gradient(circle at top left, #051a2e, #03080f);
+}
+
+.header-title {
+    text-align: center;
+    margin: 1rem 0;
+}
+
+.header-title h1 {
+    margin-bottom: 0.5rem;
+}
+
+.back-btn {
+    margin-top: 1rem;
+    max-width: 200px;
+}
+
+.dashboard-content {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    flex: 1;
+}
+
+.stats-container {
+    display: flex;
+    gap: 2rem;
+    width: 100%;
+    max-width: 1000px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.stat-card {
+    background: rgba(10, 25, 47, 0.6);
+    border: 1px solid rgba(0, 255, 204, 0.2);
+    border-radius: 15px;
+    padding: 1.5rem 2.5rem;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    min-width: 250px;
+}
+
+.stat-card h3 {
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+}
+
+.stat-number {
+    font-size: 3rem;
+    font-weight: 700;
+}
+
+.glow-danger {
+    color: var(--municipalidad-danger);
+    text-shadow: 0 0 15px var(--municipalidad-danger);
+}
+
+.glow-success {
+    color: var(--municipalidad-success);
+    text-shadow: 0 0 15px var(--municipalidad-success);
+}
+
+.reports-table-container {
+    width: 100%;
+    max-width: 1000px;
+    padding: 1.5rem;
+}
+
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.reports-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #e0e6ed;
+    text-align: left;
+}
+
+.reports-table th,
+.reports-table td {
+    padding: 1rem;
+    border-bottom: 1px solid rgba(0, 255, 204, 0.1);
+}
+
+.reports-table th {
+    color: var(--municipalidad-secondary);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+}
+
+.categoria-cell {
+    max-width: 250px;
+}
+
+.evidencia-cell {
+    color: #c4d1e0;
+}
+
+.badge.urgencia-alto {
+    background: rgba(255, 51, 102, 0.2);
+    color: #ff3366;
+    border: 1px solid #ff3366;
+}
+
+.badge.urgencia-medio {
+    background: rgba(255, 170, 0, 0.2);
+    color: #ffaa00;
+    border: 1px solid #ffaa00;
+}
+
+.view-btn {
+    background: rgba(0, 179, 255, 0.2);
+    border: 1px solid var(--municipalidad-accent);
+    color: var(--municipalidad-accent);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+.view-btn:hover {
+    background: var(--municipalidad-accent);
+    color: #fff;
+    box-shadow: 0 0 10px var(--municipalidad-accent);
+}
+
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+    .dashboard-content {
+        padding: 1rem;
+    }
+
+    .stat-card {
+        min-width: 100%;
+    }
+
+    .reports-table th,
+    .reports-table td {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.85rem;
+    }
+}

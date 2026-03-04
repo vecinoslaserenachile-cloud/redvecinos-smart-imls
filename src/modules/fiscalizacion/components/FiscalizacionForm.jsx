@@ -115,8 +115,8 @@ export default function FiscalizacionForm() {
             {/* Header Institucional Fijo */}
             <header className="institucional-header">
                 <div className="logos-container">
-                    <img src="/logo_municipio.png" alt="Ilustre Municipalidad de La Serena" className="logo" />
-                    <img src="/logo_innovacion.png" alt="Innovación Smart City" className="logo" />
+                    <img src={`${import.meta.env.BASE_URL}logo_municipio.png`} alt="Ilustre Municipalidad de La Serena" className="logo" />
+                    <img src={`${import.meta.env.BASE_URL}logo_innovacion.png`} alt="Innovación Smart City" className="logo" />
                 </div>
                 <div className="time-widget">
                     {formatDateTime(currentTime)}
@@ -156,6 +156,7 @@ export default function FiscalizacionForm() {
                                 <option value="aforo_excedido">Aforo excedido</option>
                                 <option value="falta_seguridad">Falta de personal de seguridad</option>
                                 <option value="extintor_vencido">Extintores vencidos o inaccesibles</option>
+                                <option value="problemas_electricos">Problemas eléctricos a la vista y cables en mal estado o defectuosos peligrosos</option>
                                 <option value="otro">Otro riesgo inminente</option>
                             </select>
                         </div>
