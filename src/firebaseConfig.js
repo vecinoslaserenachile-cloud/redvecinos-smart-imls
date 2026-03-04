@@ -21,6 +21,8 @@ const analytics = getAnalytics(app);
 // Initialize Cloud Firestore and Cloud Storage
 export const db = getFirestore(app);
 export const storage = getStorage(app);
+// Limitar el tiempo de reintentos nativos a 5 segundos para que no se quede colgado eternamente en fallos de red/CORS
+storage.maxUploadRetryTime = 5000;
 
 // Helper functions for Fiscalización module
 export const dbCollection = collection(db, "reportes_comerciales");
