@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './FiscalizacionForm.css'; // Asumiendo que tendrás un archivo CSS para los estilos 'glow flash'
+import { dbCollection, addDoc, serverTimestamp, storage, ref, uploadString, uploadBytes, getDownloadURL, db } from '../../../firebaseConfig';
+import { doc, updateDoc } from 'firebase/firestore';
+import { evaluarRiesgoConGemini } from '../../../middleware/geminiHook';
 
 export default function FiscalizacionForm() {
     const [currentTime, setCurrentTime] = useState(new Date());
@@ -108,9 +111,6 @@ export default function FiscalizacionForm() {
         setIsSubmitting(true);
 
         try {
-            // Importar Firestore & Storage helpers On-Demand
-            const { dbCollection, addDoc, serverTimestamp, storage, ref, uploadString, uploadBytes, getDownloadURL } = await import('../../../firebaseConfig');
-
             const fotosUrls = [];
             let audioUrl = null;
 
@@ -154,17 +154,11 @@ export default function FiscalizacionForm() {
             const docRef = await addDoc(dbCollection, nuevoReporte);
             console.log("Reporte Fiscalización Guardado con ID: ", docRef.id);
 
-            // Importar Hook Evaluador Gemini
-            const { evaluarRiesgoConGemini } = await import('../../../middleware/geminiHook');
-
             // Disparar Evaluación de IA (Asigna Urgencia y Derivación)
             const evaluacionIA = await evaluarRiesgoConGemini(nuevoReporte);
 
             // Actualizar documento base con el resultado de la IA
             if (evaluacionIA && evaluacionIA.procesado) {
-                const { doc, updateDoc } = await import('firebase/firestore');
-                const { db } = await import('../../../firebaseConfig');
-
                 await updateDoc(doc(db, "reportes_comerciales", docRef.id), {
                     "evaluacionIA": evaluacionIA
                 });
