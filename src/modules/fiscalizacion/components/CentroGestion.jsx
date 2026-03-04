@@ -1,30 +1,46 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './CentroGestion.css';
 import { Link } from 'react-router-dom';
+import { dbCollection } from '../../../firebaseConfig';
+import { onSnapshot, query, orderBy } from 'firebase/firestore';
 
 export default function CentroGestion() {
-    const [reportes] = useState([
-        {
-            id: "REP-001",
-            fecha: new Date().toLocaleString(),
-            categoria: "Vías de evacuación bloqueadas",
-            descripcion: "Pasillo 3 bloqueado por cajas de mercadería",
-            urgencia: "Alto",
-            estado: "Pendiente",
-            fotos: 1,
-            audio: true
-        },
-        {
-            id: "REP-002",
-            fecha: new Date().toLocaleString(),
-            categoria: "Problemas eléctricos a la vista",
-            descripcion: "Cables expuestos cerca del área de congelados",
-            urgencia: "Medio",
-            estado: "En Revisión",
-            fotos: 2,
-            audio: false
-        }
-    ]);
+    const [reportes, setReportes] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        // Escuchar la base de datos en tiempo real, ordenando por fecha más reciente
+        const q = query(dbCollection, orderBy("fechaCreacion", "desc"));
+
+        const unsubscribe = onSnapshot(q, (querySnapshot) => {
+            const liveData = [];
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                liveData.push({
+                    id: doc.id,
+                    fecha: data.fechaCreacion ? data.fechaCreacion.toDate().toLocaleString('es-CL') : 'Pendiente...',
+                    categoria: data.categoriaRiesgo,
+                    descripcion: data.descripcionCiudadano,
+                    urgencia: data.evaluacionIA && data.evaluacionIA.procesado ? data.evaluacionIA.nivelUrgencia : 'Evaluando',
+                    estado: data.estado,
+                    fotos: data.evidencia && data.evidencia.fotografias ? data.evidencia.fotografias.length : 0,
+                    audio: !!(data.evidencia && data.evidencia.notaDeVoz),
+                    rawIA: data.evaluacionIA
+                });
+            });
+            setReportes(liveData);
+            setLoading(false);
+        }, (error) => {
+            console.error("Error cargando panel de control:", error);
+            setLoading(false);
+        });
+
+        // Desconectar el listener cuando se cierre el componente
+        return () => unsubscribe();
+    }, []);
+
+    // Calcular métricas
+    const reportesEvaluados = reportes.filter(r => r.urgencia !== 'Evaluando').length;
 
     return (
         <div className="centro-gestion-container glow-flash-theme">
@@ -67,9 +83,15 @@ export default function CentroGestion() {
                                 </tr>
                             </thead>
                             <tbody>
+                                {loading && (
+                                    <tr><td colSpan="6" style={{ textAlign: "center" }}>Sincronizando Plataforma Central...</td></tr>
+                                )}
+                                {!loading && reportes.length === 0 && (
+                                    <tr><td colSpan="6" style={{ textAlign: "center" }}>No hay alertas registradas por los ciudadanos.</td></tr>
+                                )}
                                 {reportes.map(rep => (
                                     <tr key={rep.id}>
-                                        <td>{rep.id}</td>
+                                        <td>{rep.id.substring(0, 8)}...</td>
                                         <td>{rep.fecha}</td>
                                         <td className="categoria-cell">{rep.categoria}</td>
                                         <td>
