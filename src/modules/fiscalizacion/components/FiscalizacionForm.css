@@ -1,0 +1,336 @@
+/* FiscalizacionForm.css - Estilo "Glow Flash" Institucional, Mobile-First */
+
+:root {
+  --municipalidad-primary: #0a192f;        /* Azul oscuro institucional */
+  --municipalidad-secondary: #00ffcc;      /* Cyan neon "Glow Flash" */
+  --municipalidad-accent: #00b3ff;         /* Azul neon */
+  --municipalidad-danger: #ff3366;         /* Rojo neon para alertas */
+  --municipalidad-success: #00ff66;        /* Verde neon para éxito */
+  --bg-dark: #050b14;
+  --text-light: #e0e6ed;
+  --glass-bg: rgba(10, 25, 47, 0.7);
+  --glass-border: rgba(0, 255, 204, 0.2);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', 'Roboto', sans-serif; /* Tipografía moderna */
+}
+
+body {
+  background-color: var(--bg-dark);
+  color: var(--text-light);
+}
+
+.fiscalizacion-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: radial-gradient(circle at top right, #001f3f, var(--bg-dark));
+  overflow-x: hidden;
+}
+
+/* Header Institucional */
+.institucional-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--glass-border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+}
+
+.logos-container {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 600px;
+  margin-bottom: 0.5rem;
+}
+
+.logo {
+  height: 40px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 5px rgba(255,255,255,0.3));
+}
+
+.time-widget {
+  font-size: 0.85rem;
+  color: var(--municipalidad-secondary);
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-shadow: 0 0 8px var(--municipalidad-secondary);
+}
+
+/* Content Area */
+.content-area {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1.5rem;
+  width: 100%;
+}
+
+/* Glow Cards (Glassmorphism + Neon Glow) */
+.glow-card {
+  width: 100%;
+  max-width: 500px; /* Mobile-first, but looks good on desktop */
+  background: var(--glass-bg);
+  border-radius: 20px;
+  padding: 2rem;
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 0 20px rgba(0, 255, 204, 0.1), inset 0 0 20px rgba(0, 255, 204, 0.05);
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Typography & Glow Text */
+.glow-text {
+  color: var(--text-light);
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+  margin-bottom: 1.5rem;
+  text-align: center;
+  font-weight: 600;
+}
+
+.glow-card h1.glow-text {
+  font-size: 1.8rem;
+  color: var(--municipalidad-secondary);
+  text-shadow: 0 0 15px var(--municipalidad-secondary);
+}
+
+.glow-card h2.glow-text {
+  font-size: 1.5rem;
+  color: var(--municipalidad-accent);
+  text-shadow: 0 0 10px var(--municipalidad-accent);
+}
+
+.exact-message {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+  text-align: justify;
+  font-weight: 300;
+  color: #c4d1e0;
+}
+
+.text-success {
+  color: var(--municipalidad-success) !important;
+  text-shadow: 0 0 15px var(--municipalidad-success) !important;
+  font-size: 2rem !important;
+}
+
+/* Forms */
+.form-group {
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-size: 0.9rem;
+  color: var(--municipalidad-secondary);
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+select, textarea {
+  width: 100%;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  color: var(--text-light);
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--municipalidad-secondary);
+  box-shadow: 0 0 15px rgba(0, 255, 204, 0.3);
+  background: rgba(0, 0, 0, 0.6);
+}
+
+/* Multimedia Group */
+.multimedia-group {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 1rem;
+  border-radius: 15px;
+  border: 1px dashed var(--municipalidad-accent);
+}
+
+.camera-viewfinder {
+  width: 100%;
+  height: 250px;
+  background: #000;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+  position: relative;
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+}
+
+.camera-viewfinder video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.multimedia-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 1rem;
+}
+
+.btn-action {
+  flex: 1;
+  padding: 0.8rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+}
+
+.capture-btn {
+  background: rgba(0, 179, 255, 0.2);
+  color: var(--municipalidad-accent);
+  border: 1px solid var(--municipalidad-accent);
+}
+
+.capture-btn:active {
+  background: var(--municipalidad-accent);
+  color: #fff;
+  box-shadow: 0 0 20px var(--municipalidad-accent);
+}
+
+.audio-btn {
+  background: rgba(255, 51, 102, 0.2);
+  color: var(--municipalidad-danger);
+  border: 1px solid var(--municipalidad-danger);
+}
+
+.audio-btn.recording {
+  background: var(--municipalidad-danger);
+  color: #fff;
+  animation: pulse 1.5s infinite;
+  box-shadow: 0 0 20px var(--municipalidad-danger);
+}
+
+.evidence-preview {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  background: var(--municipalidad-success);
+  color: #000;
+  padding: 0.3rem 0.6rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  box-shadow: 0 0 10px var(--municipalidad-success);
+}
+
+/* Main Buttons */
+.glow-button {
+  width: 100%;
+  padding: 1.2rem;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary {
+  background: linear-gradient(45deg, var(--municipalidad-primary), var(--municipalidad-secondary));
+  color: #000;
+  box-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 0 25px rgba(0, 255, 204, 0.8);
+  transform: translateY(-2px);
+}
+
+.btn-success {
+  background: linear-gradient(45deg, #004d26, var(--municipalidad-success));
+  color: #000;
+  box-shadow: 0 0 15px rgba(0, 255, 102, 0.4);
+}
+
+.btn-success:hover {
+  box-shadow: 0 0 25px rgba(0, 255, 102, 0.8);
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  width: 100%;
+  padding: 1rem;
+  background: transparent;
+  border: 1px solid var(--municipalidad-accent);
+  color: var(--municipalidad-accent);
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+  background: rgba(0, 179, 255, 0.1);
+  box-shadow: 0 0 15px rgba(0, 179, 255, 0.4);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* Mobile Adjustments */
+@media (max-width: 480px) {
+  .glow-card {
+    padding: 1.5rem;
+    border-radius: 15px;
+  }
+  
+  .exact-message {
+    font-size: 0.95rem;
+  }
+  
+  .camera-viewfinder {
+    height: 200px;
+  }
+}
