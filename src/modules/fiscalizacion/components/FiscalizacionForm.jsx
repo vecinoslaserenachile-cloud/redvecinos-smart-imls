@@ -184,10 +184,18 @@ export default function FiscalizacionForm() {
             setStep(3);
         } catch (error) {
             console.error("Error crítico procesando el reporte hacia Firebase:", error);
-            if (error.message === 'TIMEOUT') {
-                alert("Tiempo de espera agotado. El servidor está bloqueando la subida de sus fotos por seguridad (CORS). Intente nuevamente más tarde o contacte a soporte técnico.");
+
+            // Firebase tira un error cuando maxUploadRetryTime se agota, o cuando hay bloqueo directo de CORS.
+            const isCorsOrTimeout =
+                error.message === 'TIMEOUT' ||
+                (error.code && error.code.includes('storage/retry-limit-exceeded')) ||
+                (error.message && error.message.includes('retry time')) ||
+                (error.code && error.code.includes('storage/unauthorized'));
+
+            if (isCorsOrTimeout) {
+                alert("Tiempo de espera agotado. Firebase Storage está bloqueando la subida por seguridad (Falta configurar regla CORS en la consola). El reporte no fue enviado.");
             } else {
-                alert("Hubo un error seguro al transmitir su reporte. Por favor inténtelo de nuevo.");
+                alert(`Hubo un error seguro al transmitir su reporte: ${error.message || 'Inténtelo de nuevo.'}`);
             }
         } finally {
             setIsSubmitting(false);
