@@ -1,5 +1,5 @@
 import { getVertexAI, getGenerativeModel } from "firebase/vertexai";
-import { app } from "./firebaseConfig"; // Ensure you export 'app' from firebaseConfig.js
+import { app } from "../firebaseConfig"; // Ensure you export 'app' from firebaseConfig.js
 
 // Initialize Vertex AI (Serverless Gemini on Firebase)
 // Documentación: https://firebase.google.com/docs/vertex-ai
