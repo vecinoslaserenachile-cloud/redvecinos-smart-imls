@@ -21,10 +21,19 @@ export default function FiscalizacionForm() {
     const [audioChunks, setAudioChunks] = useState([]);
     const [isRecording, setIsRecording] = useState(false);
 
-    // Widget de tiempo (Día de la semana, Fecha completa, Año y Hora exacta con segundos)
+    // Limpieza al desmontar el componente (Para soltar la cámara si el usuario cierra la app)
     useEffect(() => {
         const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-        return () => clearInterval(timer);
+        return () => {
+            clearInterval(timer);
+            if (videoRef.current && videoRef.current.srcObject) {
+                const tracks = videoRef.current.srcObject.getTracks();
+                tracks.forEach(track => track.stop());
+            }
+            if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+                mediaRecorderRef.current.stop();
+            }
+        };
     }, []);
 
     const formatDateTime = (date) => {
@@ -174,13 +183,7 @@ export default function FiscalizacionForm() {
                 console.log("Evaluación IA Adjuntada Exitosamente:", evaluacionIA);
             }
 
-            // 4. Detener streams activos de la cámara para no consumir batería
-            if (videoRef.current && videoRef.current.srcObject) {
-                const tracks = videoRef.current.srcObject.getTracks();
-                tracks.forEach(track => track.stop());
-            }
-
-            // Disparar mensaje final de éxito solo si no hubo errores bloqueantes
+            // Disparar mensaje final de éxito
             setStep(3);
         } catch (error) {
             console.error("Error crítico procesando el reporte hacia Firebase:", error);
@@ -199,6 +202,13 @@ export default function FiscalizacionForm() {
             }
         } finally {
             setIsSubmitting(false);
+            // APAGAR CÁMARA SIEMPRE: Ya sea éxito o fallo (CORS), liberamos el hardware de Windows/Android 
+            // para que no arroje "Device in use" en el próximo intento.
+            if (videoRef.current && videoRef.current.srcObject) {
+                const tracks = videoRef.current.srcObject.getTracks();
+                tracks.forEach(track => track.stop());
+                videoRef.current.srcObject = null;
+            }
         }
     };
 
