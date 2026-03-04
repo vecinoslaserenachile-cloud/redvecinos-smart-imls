@@ -46,8 +46,8 @@ export default function CentroGestion() {
         <div className="centro-gestion-container glow-flash-theme">
             <header className="institucional-header">
                 <div className="logos-container">
-                    <img src={`${import.meta.env.BASE_URL}logo_municipio.png`} alt="Ilustre Municipalidad de La Serena" className="logo" />
-                    <img src={`${import.meta.env.BASE_URL}logo_innovacion.png`} alt="Innovación Smart City" className="logo" />
+                    <img src="/logo_municipio.png" alt="Ilustre Municipalidad de La Serena" className="logo" />
+                    <img src="/logo_innovacion.png" alt="Innovación Smart City" className="logo" />
                 </div>
                 <div className="header-title">
                     <h1 className="glow-text">Centro de Gestión</h1>

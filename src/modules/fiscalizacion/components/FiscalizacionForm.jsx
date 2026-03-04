@@ -55,7 +55,7 @@ export default function FiscalizacionForm() {
             }
         } catch (error) {
             console.error("Error solicitando permisos multimedia:", error);
-            alert("Para utilizar todas las funciones, por favor otorgue los permisos de cámara, micrófono y ubicación.");
+            alert("Estimado ciudadano: La Ilustre Municipalidad de La Serena requiere obligatoriamente su autorización para acceder a la cámara, micrófono y ubicación. Esto garantiza la seguridad institucional y la validación de la evidencia in situ al generar un reporte.");
         }
     };
 
@@ -207,8 +207,8 @@ export default function FiscalizacionForm() {
             {/* Header Institucional Fijo */}
             <header className="institucional-header">
                 <div className="logos-container">
-                    <img src={`${import.meta.env.BASE_URL}logo_municipio.png`} alt="Ilustre Municipalidad de La Serena" className="logo" />
-                    <img src={`${import.meta.env.BASE_URL}logo_innovacion.png`} alt="Innovación Smart City" className="logo" />
+                    <img src="/logo_municipio.png" alt="Ilustre Municipalidad de La Serena" className="logo" />
+                    <img src="/logo_innovacion.png" alt="Innovación Smart City" className="logo" />
                 </div>
                 <div className="time-widget">
                     {formatDateTime(currentTime)}
