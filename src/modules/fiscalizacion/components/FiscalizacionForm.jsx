@@ -114,11 +114,20 @@ export default function FiscalizacionForm() {
             const fotosUrls = [];
             let audioUrl = null;
 
+            // Función auxiliar para forzar timeout en promesas que se quedan colgadas (como el error de CORS silently blocked)
+            const withTimeout = (promise, ms = 15000) => {
+                let timer;
+                const timeoutPromise = new Promise((_, reject) => {
+                    timer = setTimeout(() => reject(new Error('TIMEOUT')), ms);
+                });
+                return Promise.race([promise, timeoutPromise]).finally(() => clearTimeout(timer));
+            };
+
             // 1. Subir Fotografías a Firebase Storage
             if (formData.fotos.length > 0) {
                 for (let i = 0; i < formData.fotos.length; i++) {
                     const fotoRef = ref(storage, `evidencia_comercial/fotos/${Date.now()}_${i}.jpg`);
-                    await uploadString(fotoRef, formData.fotos[i], 'data_url');
+                    await withTimeout(uploadString(fotoRef, formData.fotos[i], 'data_url'));
                     const url = await getDownloadURL(fotoRef);
                     fotosUrls.push(url);
                 }
@@ -127,7 +136,7 @@ export default function FiscalizacionForm() {
             // 2. Subir Nota de Voz a Firebase Storage
             if (formData.notaVoz) {
                 const audioRef = ref(storage, `evidencia_comercial/audios/${Date.now()}.webm`);
-                await uploadBytes(audioRef, formData.notaVoz);
+                await withTimeout(uploadBytes(audioRef, formData.notaVoz));
                 audioUrl = await getDownloadURL(audioRef);
             }
 
@@ -175,7 +184,11 @@ export default function FiscalizacionForm() {
             setStep(3);
         } catch (error) {
             console.error("Error crítico procesando el reporte hacia Firebase:", error);
-            alert("Hubo un error seguro al transmitir su reporte. Por favor inténtelo de nuevo.");
+            if (error.message === 'TIMEOUT') {
+                alert("Tiempo de espera agotado. El servidor está bloqueando la subida de sus fotos por seguridad (CORS). Intente nuevamente más tarde o contacte a soporte técnico.");
+            } else {
+                alert("Hubo un error seguro al transmitir su reporte. Por favor inténtelo de nuevo.");
+            }
         } finally {
             setIsSubmitting(false);
         }
