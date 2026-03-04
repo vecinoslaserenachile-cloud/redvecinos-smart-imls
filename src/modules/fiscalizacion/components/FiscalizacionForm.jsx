@@ -95,18 +95,95 @@ export default function FiscalizacionForm() {
         }
     };
 
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
     const submitReport = async (e) => {
         e.preventDefault();
-        // Aquí iría la lógica para procesar la subida a Firebase (Storage y Firestore)
-        // Luego hacer la llamada al Backend Middleware (Gemini)
 
-        // Simulando proceso de carga completo:
-        setStep(3);
+        if (!formData.latitud || !formData.longitud) {
+            alert("No podemos enviar el reporte sin su ubicación GPS activa.");
+            return;
+        }
 
-        // Detener streams activos de la cámara para no consumir batería
-        if (videoRef.current && videoRef.current.srcObject) {
-            const tracks = videoRef.current.srcObject.getTracks();
-            tracks.forEach(track => track.stop());
+        setIsSubmitting(true);
+
+        try {
+            // Importar Firestore & Storage helpers On-Demand
+            const { dbCollection, addDoc, serverTimestamp, storage, ref, uploadString, uploadBytes, getDownloadURL } = await import('../../../firebaseConfig');
+
+            const fotosUrls = [];
+            let audioUrl = null;
+
+            // 1. Subir Fotografías a Firebase Storage
+            if (formData.fotos.length > 0) {
+                for (let i = 0; i < formData.fotos.length; i++) {
+                    const fotoRef = ref(storage, `evidencia_comercial/fotos/${Date.now()}_${i}.jpg`);
+                    await uploadString(fotoRef, formData.fotos[i], 'data_url');
+                    const url = await getDownloadURL(fotoRef);
+                    fotosUrls.push(url);
+                }
+            }
+
+            // 2. Subir Nota de Voz a Firebase Storage
+            if (formData.notaVoz) {
+                const audioRef = ref(storage, `evidencia_comercial/audios/${Date.now()}.webm`);
+                await uploadBytes(audioRef, formData.notaVoz);
+                audioUrl = await getDownloadURL(audioRef);
+            }
+
+            // 3. Crear el Documento en Firestore 
+            const nuevoReporte = {
+                fechaCreacion: serverTimestamp(),
+                estado: "Pendiente",
+                ubicacion: {
+                    latitud: formData.latitud,
+                    longitud: formData.longitud,
+                    direccionAproximada: "Recinto Comercial No Especificado"
+                },
+                categoriaRiesgo: formData.categoria,
+                descripcionCiudadano: formData.descripcion,
+                evidencia: {
+                    fotografias: fotosUrls,
+                    notaDeVoz: audioUrl
+                },
+                evaluacionIA: {
+                    procesado: false, // Será procesado por Gemini en el backend/hook posteriormente
+                }
+            };
+
+            const docRef = await addDoc(dbCollection, nuevoReporte);
+            console.log("Reporte Fiscalización Guardado con ID: ", docRef.id);
+
+            // Importar Hook Evaluador Gemini
+            const { evaluarRiesgoConGemini } = await import('../../../middleware/geminiHook');
+
+            // Disparar Evaluación de IA (Asigna Urgencia y Derivación)
+            const evaluacionIA = await evaluarRiesgoConGemini(nuevoReporte);
+
+            // Actualizar documento base con el resultado de la IA
+            if (evaluacionIA && evaluacionIA.procesado) {
+                const { doc, updateDoc } = await import('firebase/firestore');
+                const { db } = await import('../../../firebaseConfig');
+
+                await updateDoc(doc(db, "reportes_comerciales", docRef.id), {
+                    "evaluacionIA": evaluacionIA
+                });
+                console.log("Evaluación IA Adjuntada Exitosamente:", evaluacionIA);
+            }
+
+            // 4. Detener streams activos de la cámara para no consumir batería
+            if (videoRef.current && videoRef.current.srcObject) {
+                const tracks = videoRef.current.srcObject.getTracks();
+                tracks.forEach(track => track.stop());
+            }
+
+            // Disparar mensaje final de éxito solo si no hubo errores bloqueantes
+            setStep(3);
+        } catch (error) {
+            console.error("Error crítico procesando el reporte hacia Firebase:", error);
+            alert("Hubo un error seguro al transmitir su reporte. Por favor inténtelo de nuevo.");
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -190,8 +267,8 @@ export default function FiscalizacionForm() {
                             ></textarea>
                         </div>
 
-                        <button type="submit" className="btn-success glow-button">
-                            Enviar Alerta Oficial
+                        <button type="submit" className="btn-success glow-button" disabled={isSubmitting}>
+                            {isSubmitting ? 'Enviando Alerta Segura...' : 'Enviar Alerta Oficial'}
                         </button>
                     </form>
                 )}
