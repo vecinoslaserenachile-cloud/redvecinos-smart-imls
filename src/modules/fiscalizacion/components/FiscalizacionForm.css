@@ -157,7 +157,8 @@ body {
 }
 
 select,
-textarea {
+textarea,
+.form-control {
   width: 100%;
   padding: 1rem;
   background: rgba(0, 0, 0, 0.4);
@@ -169,11 +170,32 @@ textarea {
 }
 
 select:focus,
-textarea:focus {
+textarea:focus,
+.form-control:focus {
   outline: none;
   border-color: var(--municipalidad-secondary);
   box-shadow: 0 0 15px rgba(0, 255, 204, 0.3);
   background: rgba(0, 0, 0, 0.6);
+}
+
+.row-group {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+
+.half-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.half-group label {
+  font-size: 0.85rem;
+  color: var(--municipalidad-secondary);
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  text-transform: uppercase;
 }
 
 /* Multimedia Group */

@@ -12,6 +12,11 @@ export default function FiscalizacionForm() {
         descripcion: '',
         latitud: null,
         longitud: null,
+        direccion: '',
+        empresa: '',
+        sucursal: '', // Opcional
+        fechaIncidente: new Date().toISOString().split('T')[0], // Hoy por defecto
+        horaIncidente: new Date().toTimeString().slice(0, 5), // Hora actual por defecto
         fotos: [],
         notaVoz: null,
     });
@@ -156,7 +161,13 @@ export default function FiscalizacionForm() {
                 ubicacion: {
                     latitud: formData.latitud,
                     longitud: formData.longitud,
-                    direccionAproximada: "Recinto Comercial No Especificado"
+                    direccionFormato: formData.direccion,
+                    empresaAfectada: formData.empresa,
+                    sucursalOLocal: formData.sucursal || "No especificada"
+                },
+                detallesIncidente: {
+                    fecha: formData.fechaIncidente,
+                    hora: formData.horaIncidente
                 },
                 categoriaRiesgo: formData.categoria,
                 descripcionCiudadano: formData.descripcion,
@@ -261,6 +272,64 @@ export default function FiscalizacionForm() {
                                 <option value="problemas_electricos">Problemas eléctricos a la vista y cables en mal estado o defectuosos peligrosos</option>
                                 <option value="otro">Otro riesgo inminente</option>
                             </select>
+                        </div>
+
+                        <div className="form-group">
+                            <label>Lugar exacto / Dirección</label>
+                            <input
+                                type="text"
+                                required
+                                placeholder="Ej: Av. Balmaceda 3242"
+                                value={formData.direccion}
+                                onChange={e => setFormData({ ...formData, direccion: e.target.value })}
+                                className="form-control"
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label>Empresa / Cadena / Entidad</label>
+                            <input
+                                type="text"
+                                required
+                                placeholder="Ej: Supermercado Líder, Mall Plaza..."
+                                value={formData.empresa}
+                                onChange={e => setFormData({ ...formData, empresa: e.target.value })}
+                                className="form-control"
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label>Sucursal o Local (Opcional)</label>
+                            <input
+                                type="text"
+                                placeholder="Ej: Local 204, Patio de Comidas"
+                                value={formData.sucursal}
+                                onChange={e => setFormData({ ...formData, sucursal: e.target.value })}
+                                className="form-control"
+                            />
+                        </div>
+
+                        <div className="form-group row-group">
+                            <div className="half-group">
+                                <label>Fecha del Incidente</label>
+                                <input
+                                    type="date"
+                                    required
+                                    value={formData.fechaIncidente}
+                                    onChange={e => setFormData({ ...formData, fechaIncidente: e.target.value })}
+                                    className="form-control"
+                                />
+                            </div>
+                            <div className="half-group">
+                                <label>Hora Aproximada</label>
+                                <input
+                                    type="time"
+                                    required
+                                    value={formData.horaIncidente}
+                                    onChange={e => setFormData({ ...formData, horaIncidente: e.target.value })}
+                                    className="form-control"
+                                />
+                            </div>
                         </div>
 
                         <div className="form-group multimedia-group">

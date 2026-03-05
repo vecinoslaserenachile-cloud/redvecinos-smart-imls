@@ -23,6 +23,8 @@ export default function CentroGestion() {
                     descripcion: data.descripcionCiudadano,
                     urgencia: data.evaluacionIA && data.evaluacionIA.procesado ? data.evaluacionIA.nivelUrgencia : 'Evaluando',
                     estado: data.estado,
+                    empresa: data.ubicacion?.empresaAfectada || 'No registrada',
+                    direccion: data.ubicacion?.direccionFormato || 'No registrada',
                     fotos: data.evidencia && data.evidencia.fotografias ? data.evidencia.fotografias.length : 0,
                     audio: !!(data.evidencia && data.evidencia.notaDeVoz),
                     rawIA: data.evaluacionIA
@@ -76,6 +78,8 @@ export default function CentroGestion() {
                                 <tr>
                                     <th>ID Alerta</th>
                                     <th>Fecha y Hora</th>
+                                    <th>Empresa/Local</th>
+                                    <th>Dirección</th>
                                     <th>Categoría de Riesgo</th>
                                     <th>Nivel IA</th>
                                     <th>Evidencia Adjunta</th>
@@ -93,6 +97,8 @@ export default function CentroGestion() {
                                     <tr key={rep.id}>
                                         <td>{rep.id.substring(0, 8)}...</td>
                                         <td>{rep.fecha}</td>
+                                        <td>{rep.empresa}</td>
+                                        <td>{rep.direccion}</td>
                                         <td className="categoria-cell">{rep.categoria}</td>
                                         <td>
                                             <span className={`badge urgencia-${rep.urgencia.toLowerCase()}`}>{rep.urgencia}</span>
