@@ -167,7 +167,16 @@ export default function FiscalizacionForm() {
                 }
             };
 
-            const docRef = await addDoc(dbCollection, nuevoReporte);
+            // Función auxiliar para forzar timeout en la conexión a la base de datos
+            const addDocWithTimeout = (promise, ms = 10000) => {
+                let timer;
+                const timeoutPromise = new Promise((_, reject) => {
+                    timer = setTimeout(() => reject(new Error('FIRESTORE_TIMEOUT')), ms);
+                });
+                return Promise.race([promise, timeoutPromise]).finally(() => clearTimeout(timer));
+            };
+
+            const docRef = await addDocWithTimeout(addDoc(dbCollection, nuevoReporte));
             console.log("Reporte Fiscalización Guardado con ID: ", docRef.id);
 
             // Iniciar Evaluación IA en segundo plano (para no bloquear la pantalla de éxito)
@@ -184,7 +193,12 @@ export default function FiscalizacionForm() {
             setStep(3);
         } catch (error) {
             console.error("Error crítico guardando en Firebase Firestore:", error);
-            alert(`Hubo un error seguro al transmitir su reporte: ${error.message || 'Inténtelo de nuevo.'}`);
+
+            if (error.message === 'FIRESTORE_TIMEOUT') {
+                alert("❌ TIEMPO DE ESPERA AGOTADO: La aplicación no logró conectar con la Base de Datos.\n\nPor favor, dirígete a tu consola de Firebase > 'Firestore Database' y presiona el botón 'Crear base de datos' para habilitar el servicio.");
+            } else {
+                alert(`Hubo un error seguro al transmitir su reporte: ${error.message || 'Inténtelo de nuevo.'}`);
+            }
         } finally {
             setIsSubmitting(false);
             // APAGAR CÁMARA SIEMPRE: Ya sea éxito o fallo (CORS), liberamos el hardware de Windows/Android 
