@@ -170,18 +170,17 @@ export default function FiscalizacionForm() {
             const docRef = await addDoc(dbCollection, nuevoReporte);
             console.log("Reporte Fiscalización Guardado con ID: ", docRef.id);
 
-            // Disparar Evaluación de IA (Asigna Urgencia y Derivación)
-            const evaluacionIA = await evaluarRiesgoConGemini(nuevoReporte);
+            // Iniciar Evaluación IA en segundo plano (para no bloquear la pantalla de éxito)
+            evaluarRiesgoConGemini(nuevoReporte).then(async (evaluacionIA) => {
+                if (evaluacionIA && evaluacionIA.procesado) {
+                    await updateDoc(doc(db, "reportes_comerciales", docRef.id), {
+                        "evaluacionIA": evaluacionIA
+                    });
+                    console.log("Evaluación IA Adjuntada Exitosamente:", evaluacionIA);
+                }
+            }).catch(e => console.error("Error evaluando IA en background:", e));
 
-            // Actualizar documento base con el resultado de la IA
-            if (evaluacionIA && evaluacionIA.procesado) {
-                await updateDoc(doc(db, "reportes_comerciales", docRef.id), {
-                    "evaluacionIA": evaluacionIA
-                });
-                console.log("Evaluación IA Adjuntada Exitosamente:", evaluacionIA);
-            }
-
-            // Disparar mensaje final de éxito
+            // Disparar mensaje final de éxito inmediatamente
             setStep(3);
         } catch (error) {
             console.error("Error crítico guardando en Firebase Firestore:", error);
