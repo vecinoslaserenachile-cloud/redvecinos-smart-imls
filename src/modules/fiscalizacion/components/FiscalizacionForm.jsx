@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './FiscalizacionForm.css'; // Asumiendo que tendrás un archivo CSS para los estilos 'glow flash'
-import { dbCollection, addDoc, serverTimestamp, storage, ref, uploadString, uploadBytes, getDownloadURL, db } from '../../../firebaseConfig';
+import { dbCollection, addDoc, serverTimestamp, db } from '../../../firebaseConfig';
 import { doc, updateDoc } from 'firebase/firestore';
 import { evaluarRiesgoConGemini } from '../../../middleware/geminiHook';
 
@@ -103,12 +103,15 @@ export default function FiscalizacionForm() {
     const takePhoto = () => {
         if (videoRef.current) {
             const canvas = document.createElement('canvas');
-            canvas.width = videoRef.current.videoWidth;
-            canvas.height = videoRef.current.videoHeight;
+            // Reducir la resolución original para no saturar la base de datos con Base64 muy largos
+            const scaleFactor = 0.5; // Escala a la mitad
+            canvas.width = videoRef.current.videoWidth * scaleFactor;
+            canvas.height = videoRef.current.videoHeight * scaleFactor;
             const ctx = canvas.getContext('2d');
             ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-            const dataUrl = canvas.toDataURL('image/jpeg');
-            setFormData(prev => ({ ...prev, fotos: [...prev.fotos, dataUrl] }));
+            // Exportar comprimido brutalmente: JPEG a 40% de calidad. Base64 resultante será un string mucho más liviano.
+            const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.4);
+            setFormData(prev => ({ ...prev, fotos: [...prev.fotos, compressedDataUrl] }));
         }
     };
 
@@ -125,36 +128,20 @@ export default function FiscalizacionForm() {
         setIsSubmitting(true);
 
         try {
-            const fotosUrls = [];
+            const fotosUrls = formData.fotos; // Ya son Base64 optimizados (desde takePhoto)
             let audioUrl = null;
 
-            // Función auxiliar para forzar timeout en promesas que se quedan colgadas (como el error de CORS silently blocked)
-            const withTimeout = (promise, ms = 15000) => {
-                let timer;
-                const timeoutPromise = new Promise((_, reject) => {
-                    timer = setTimeout(() => reject(new Error('TIMEOUT')), ms);
-                });
-                return Promise.race([promise, timeoutPromise]).finally(() => clearTimeout(timer));
-            };
-
-            // 1. Subir Fotografías a Firebase Storage
-            if (formData.fotos.length > 0) {
-                for (let i = 0; i < formData.fotos.length; i++) {
-                    const fotoRef = ref(storage, `evidencia_comercial/fotos/${Date.now()}_${i}.jpg`);
-                    await withTimeout(uploadString(fotoRef, formData.fotos[i], 'data_url'));
-                    const url = await getDownloadURL(fotoRef);
-                    fotosUrls.push(url);
-                }
-            }
-
-            // 2. Subir Nota de Voz a Firebase Storage
+            // 1. Convertir Blob (Nota de Voz) a Base64 usando promesa
             if (formData.notaVoz) {
-                const audioRef = ref(storage, `evidencia_comercial/audios/${Date.now()}.webm`);
-                await withTimeout(uploadBytes(audioRef, formData.notaVoz));
-                audioUrl = await getDownloadURL(audioRef);
+                audioUrl = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(formData.notaVoz);
+                });
             }
 
-            // 3. Crear el Documento en Firestore 
+            // 2. Crear el Documento en Firestore con los textos gigantes directamente incrustados
             const nuevoReporte = {
                 fechaCreacion: serverTimestamp(),
                 estado: "Pendiente",
@@ -197,20 +184,8 @@ export default function FiscalizacionForm() {
             // Disparar mensaje final de éxito
             setStep(3);
         } catch (error) {
-            console.error("Error crítico procesando el reporte hacia Firebase:", error);
-
-            // Firebase tira un error cuando maxUploadRetryTime se agota, o cuando hay bloqueo directo de CORS.
-            const isCorsOrTimeout =
-                error.message === 'TIMEOUT' ||
-                (error.code && error.code.includes('storage/retry-limit-exceeded')) ||
-                (error.message && error.message.includes('retry time')) ||
-                (error.code && error.code.includes('storage/unauthorized'));
-
-            if (isCorsOrTimeout) {
-                alert("Tiempo de espera agotado. Firebase Storage está bloqueando la subida por seguridad (Falta configurar regla CORS en la consola). El reporte no fue enviado.");
-            } else {
-                alert(`Hubo un error seguro al transmitir su reporte: ${error.message || 'Inténtelo de nuevo.'}`);
-            }
+            console.error("Error crítico guardando en Firebase Firestore:", error);
+            alert(`Hubo un error seguro al transmitir su reporte: ${error.message || 'Inténtelo de nuevo.'}`);
         } finally {
             setIsSubmitting(false);
             // APAGAR CÁMARA SIEMPRE: Ya sea éxito o fallo (CORS), liberamos el hardware de Windows/Android 
